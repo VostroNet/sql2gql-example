@@ -1,0 +1,40 @@
+{
+  "name": "sql2gql",
+  "version": "1.0.0",
+  "description": "Two way GraphQL to Sequelize bridge, extending out graphql-sequelize",
+  "main": "build/index.js",
+  "scripts": {
+    "test": "node ./node_modules/mocha/bin/_mocha --no-timeouts ./build/tests/**/*.test.js"
+  },
+  "author": "Matthew Mckenzie",
+  "license": "GPL-3.0",
+  "devEngines": {
+    "node": "4.x || 5.x || 6.x || 7.x",
+    "npm": "2.x || 3.x || 4.x || 5.x"
+  },
+  "devDependencies": {
+    "babel-core": "^6.25.0",
+    "babel-eslint": "^7.2.3",
+    "babel-polyfill": "^6.23.0",
+    "babel-preset-env": "^1.5.2",
+    "babel-preset-stage-0": "^6.24.1",
+    "deep-freeze": "0.0.1",
+    "del": "^3.0.0",
+    "eslint": "^4.1.1",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-eslint": "^4.0.0",
+    "gulp-mocha": "^4.3.1",
+    "gulp-sourcemaps": "^2.6.0"
+  },
+  "dependencies": {
+    "expect": "^1.20.2",
+    "graphql": "^0.10.3",
+    "graphql-relay": "^0.5.2",
+    "graphql-sequelize": "^5.3.3",
+    "sequelize": "^4.2.1",
+    "sqlite": "^2.8.0",
+    "source-map-support": "^0.4.15",
+    "sql2gql": "https://github.com/VostroNet/sql2gql.git"
+  }
+}

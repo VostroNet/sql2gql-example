@@ -12,15 +12,9 @@ var _expect2 = _interopRequireDefault(_expect);
 
 var _graphql = require("graphql");
 
-var _sourceMapSupport = require("source-map-support");
-
-var _sourceMapSupport2 = _interopRequireDefault(_sourceMapSupport);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
-
-_sourceMapSupport2.default.install();
 
 const TaskModel = {
   name: "Task",
@@ -37,9 +31,41 @@ const TaskModel = {
           msg: "Your task name must be between 1 and 50 characters"
         }
       }
+    },
+    options: {
+      type: _sequelize2.default.STRING,
+      allowNull: true
     }
   },
-  relationships: [],
+  before(findOptions, args, context, info) {
+    // console.log("before", arguments);
+    return findOptions;
+  },
+  after(result, args, context, info) {
+    // console.log("after", result);
+    return result;
+  },
+  override: {
+    options: {
+      type: {
+        name: "TaskOptions",
+        fields: {
+          hidden: { type: _graphql.GraphQLString }
+        }
+      },
+      output(result, args, context, info) {
+        return JSON.parse(result.get("options"));
+      },
+      input(field, args, context, info) {
+        return JSON.stringify(field);
+      }
+    }
+  },
+  relationships: [{
+    type: "hasMany",
+    model: "TaskItem",
+    name: "items"
+  }],
   expose: {
     classMethods: {
       mutations: {
@@ -66,19 +92,39 @@ const TaskModel = {
             })
           }),
           args: {}
+        },
+        getHiddenData2: {
+          type: new _graphql.GraphQLObjectType({
+            name: "TaskHiddenData2",
+            fields: () => ({
+              hidden: { type: _graphql.GraphQLString }
+            })
+          }),
+          args: {}
         }
       }
     }
   },
-  classMethods: {
-    getHiddenData(args, req) {
-      return {
-        hidden: "Hi"
-      };
-    }
-  },
   options: {
     tableName: "tasks",
+    classMethods: {
+      reverseName({ input: { amount } }, req) {
+        return {
+          id: 1,
+          name: `reverseName${amount}`
+        };
+      },
+      getHiddenData(args, req) {
+        return {
+          hidden: "Hi"
+        };
+      },
+      getHiddenData2(args, req) {
+        return {
+          hidden: "Hi2"
+        };
+      }
+    },
     hooks: {
       beforeFind(options) {
         return undefined;
@@ -96,6 +142,7 @@ const TaskModel = {
     indexes: [
       // {unique: true, fields: ["name"]},
     ]
+    //instanceMethods: {}, //TODO: figure out a way to expose this on graphql
   }
 };
 
@@ -108,17 +155,24 @@ _asyncToGenerator(function* () {
   });
   (0, _sql2gql.connect)(schemas, instance, {}); // this populates the sequelize instance with the appropriate models and referential information for schema generation
   yield instance.sync();
-  const { Task } = instance.models;
-  yield Promise.all([Task.create({
-    name: "item1"
-  }), Task.create({
-    name: "item2"
-  }), Task.create({
-    name: "item3"
-  })]);
+
   const schema = yield (0, _sql2gql.createSchema)(instance); //creates graphql schema
-  const result = yield (0, _graphql.graphql)(schema, "query { models { Task { id, name } } }");
-  console.log(JSON.stringify(result.data));
-  return (0, _expect2.default)(result.data.models.Task.length).toEqual(3);
+  const mutation = `mutation {
+    models {
+      Task {
+        create(input: {name: "item1", options: {hidden: "nowhere"}}) {
+          id, 
+          name
+          options {
+            hidden
+          }
+        }
+      }
+    }
+  }`; // create item in database
+  const mutationResult = yield (0, _graphql.graphql)(schema, mutation);
+  (0, _expect2.default)(mutationResult.data.models.Task.create.options.hidden).toEqual("nowhere");
+  const queryResult = yield (0, _graphql.graphql)(schema, "query { models { Task { id, name, options {hidden} } } }"); // retrieves information from database
+  return (0, _expect2.default)(queryResult.data.models.Task[0].options.hidden).toEqual("nowhere");
 })();
 //# sourceMappingURL=index.js.map

@@ -35,6 +35,6 @@
     "sequelize": "^4.2.1",
     "sqlite": "^2.8.0",
     "source-map-support": "^0.4.15",
-    "sql2gql": "https://github.com/VostroNet/sql2gql.git"
+    "sql2gql": "^1.0.0"
   }
 }

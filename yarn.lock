@@ -3112,9 +3112,9 @@ sprintf-js@~1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
 
-"sql2gql@https://github.com/VostroNet/sql2gql.git":
+sql2gql@^1.0.0:
   version "1.0.0"
-  resolved "https://github.com/VostroNet/sql2gql.git#39bf2efbc1cc4f917fd2586ed41b9c8d29bfe00d"
+  resolved "https://registry.yarnpkg.com/sql2gql/-/sql2gql-1.0.0.tgz#4ea3dda855958fc43b3bdb33763961196dd1e744"
 
 sqlite3@^3.1.8:
   version "3.1.8"

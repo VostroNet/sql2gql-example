@@ -5,11 +5,13 @@ import path from "path";
 import cors from "cors";
 import sourceMapSupport from "source-map-support";
 import fs from "fs";
-import graphqlHTTP from "express-graphql";
+//import graphqlHTTP from "express-graphql";
+
+import { graphqlExpress, graphiqlExpress } from "graphql-server-express";
+
 import {execute, subscribe} from "graphql";
 import {SubscriptionServer} from "subscriptions-transport-ws";
 // import {SubscriptionManager} from "graphql-subscriptions";
-import {RedisPubSub} from "graphql-redis-subscriptions";
 import {createSchema} from "sql2gql";
 import {createServer} from "http";
 
@@ -50,55 +52,36 @@ Promise.promisifyAll(fs);
     },
   }));
 
-  app.use("/graphql", async(req, res, next) => {
-    return graphqlHTTP((req) => {
-      return {
-        schema,
-        graphiql: config.graphiql,
-        rootValue: req,
-        formatError: (error) => {
-          if (process.env.NODE_ENV !== "production") {
-            return {
-              message: error.message,
-              locations: error.locations,
-              stack: error.stack,
-            };
-          }
-          return {
-            message: error.message,
-          };
-        },
-      };
-    })(req, res, next);
-  });
+  app.use("/graphql", graphqlExpress((req) => {
+    return {
+      schema,
+      context: {
+        // req,
+      },
+    };
+  }));
+  if (config.graphql.graphiql) {
+    app.use("/graphiql", graphiqlExpress({
+      endpointURL: "/graphql",
+      subscriptionsEndpoint: `${config.graphql.wsHost}${config.graphql.wsPath}`,
+      query: "{}",
+    }));
+  }
+
   app.use(async(req, res, next) => {
     const file = await fs.readFileAsync(path.resolve(__dirname, "../public/index.html"), "utf-8");
     return res.send(file);
   });
-  const pubsub = new RedisPubSub({
-    connection: Object.assign({}, config.redis, {
-      retry_strategy: options => { //eslint-disable-line
-        // reconnect after
-        return Math.max(options.attempt * 100, 3000);
-      },
-    }),
-  });
-  // const subscriptionManager = new SubscriptionManager({
-  //   schema,
-  //   pubsub,
-  //   setupFunctions: {},
-  // });
 
   const server = createServer(app);
   server.listen(config.express.port, () => {
     const wsServer = new SubscriptionServer({
       schema,
-      pubsub,
       execute,
       subscribe,
     }, {
       server: server,
-      path: "/subscriptions",
+      path: config.graphql.wsPath,
     });
     log.info(`server listening on port ${config.express.port}`);
   });

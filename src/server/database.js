@@ -4,8 +4,9 @@ import {connect} from "sql2gql";
 import logger from "server/utils/logger";
 import models from "server/models";
 import config from "config";
-
 const log = logger("sql2gql-example::database:");
+
+import pubsub from "./pubsub";
 
 
 function createInstance() {
@@ -17,7 +18,7 @@ function createInstance() {
       }
     },
   }));
-  connect(models, db, {});
+  connect(models, db, {subscriptions: {pubsub}});
   return db.sync(sync);
 }
 

@@ -44,6 +44,7 @@ module.exports = {
       "NODE_ENV": JSON.stringify("development"),
       "BASEPATH": JSON.stringify("/"),
       "DEBUG": JSON.stringify("*"),
+      "GRAPHQL_WSURL": JSON.stringify("ws://localhost:4081/subscriptions"),
     },
   })],
   resolve: {

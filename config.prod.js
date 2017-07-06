@@ -16,7 +16,11 @@ module.exports = {
     host: process.env.REDIS_HOST || "redis",
     port: process.env.REDIS_PORT || "6379",
   },
-  graphiql: (process.env.GRAPHIQL !== undefined) ? (process.env.GRAPHIQL === "true") : true,
+  graphql: {
+    graphiql: true,
+    wsHost: process.env.WS_HOST,
+    wsPath: "/subscriptions",
+  },
   sequelize: {
     username: process.env.DATABASE_USER || "username",
     password: process.env.DATABASE_PASSWORD || "password",

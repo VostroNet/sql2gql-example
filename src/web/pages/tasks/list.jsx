@@ -9,7 +9,12 @@ import {Form} from "formsy";
 import FormsyText from "formsy-material-ui/lib/FormsyText";
 
 import Component from "web/components/promise";
-import {getTasks, completeTask, createTask, deleteTask} from "web/logic/graphql/app";
+import {
+  getTasks,
+  completeTask,
+  createTask,
+  deleteTask,
+} from "web/logic/graphql/app";
 
 class TaskList extends Component {
   constructor() {
@@ -17,6 +22,9 @@ class TaskList extends Component {
     this.state = {
       submitting: false,
     };
+  }
+  componentWillMount() {
+    this.props.subscribeTaskEvents();
   }
   handleDeleteTouchTap(taskId) {
     return (e) => {
@@ -79,8 +87,8 @@ class TaskList extends Component {
       </Form>
       <List>
         {tasks.map((task) => {
-          return (<ListItem key={`listItem-${task.id}`} primaryText={task.name} onTouchTap={this.handleToggleComplete(task.id)}
-            leftIcon={(task.options || {}).completed ? (<DoneIcon />) : (<ClearIcon />) }
+          return (<ListItem key={`listItem-${task.id}`} primaryText={task.name}
+            leftIcon={(task.options || {}).completed ? (<DoneIcon />) : (<ClearIcon onTouchTap={this.handleToggleComplete(task.id)} />) }
             rightIcon={<DeleteIcon onTouchTap={this.handleDeleteTouchTap(task.id)} />} />);
         })}
       </List>
@@ -88,4 +96,9 @@ class TaskList extends Component {
   }
 }
 
-export default compose(getTasks, completeTask, createTask, deleteTask)(TaskList);
+export default compose(
+  getTasks,
+  completeTask,
+  createTask,
+  deleteTask,
+)(TaskList);

@@ -28,15 +28,11 @@ var _fs = require("fs");
 
 var _fs2 = _interopRequireDefault(_fs);
 
-var _expressGraphql = require("express-graphql");
-
-var _expressGraphql2 = _interopRequireDefault(_expressGraphql);
+var _graphqlServerExpress = require("graphql-server-express");
 
 var _graphql = require("graphql");
 
 var _subscriptionsTransportWs = require("subscriptions-transport-ws");
-
-var _graphqlRedisSubscriptions = require("graphql-redis-subscriptions");
 
 var _sql2gql = require("sql2gql");
 
@@ -65,6 +61,8 @@ require("core-js/modules/es7.string.pad-end");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new _bluebird2.default(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return _bluebird2.default.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+//import graphqlHTTP from "express-graphql";
+
 // import {SubscriptionManager} from "graphql-subscriptions";
 
 
@@ -97,68 +95,42 @@ _asyncToGenerator(function* () {
     }
   }));
 
-  app.use("/graphql", (() => {
+  app.use("/graphql", (0, _graphqlServerExpress.graphqlExpress)(function (req) {
+    return {
+      schema,
+      context: {
+        // req,
+      }
+    };
+  }));
+  if (_config2.default.graphql.graphiql) {
+    app.use("/graphiql", (0, _graphqlServerExpress.graphiqlExpress)({
+      endpointURL: "/graphql",
+      subscriptionsEndpoint: `${_config2.default.graphql.wsHost}${_config2.default.graphql.wsPath}`,
+      query: "{}"
+    }));
+  }
+
+  app.use((() => {
     var _ref2 = _asyncToGenerator(function* (req, res, next) {
-      return (0, _expressGraphql2.default)(function (req) {
-        return {
-          schema,
-          graphiql: _config2.default.graphiql,
-          rootValue: req,
-          formatError: function (error) {
-            if (process.env.NODE_ENV !== "production") {
-              return {
-                message: error.message,
-                locations: error.locations,
-                stack: error.stack
-              };
-            }
-            return {
-              message: error.message
-            };
-          }
-        };
-      })(req, res, next);
+      const file = yield _fs2.default.readFileAsync(_path2.default.resolve(__dirname, "../public/index.html"), "utf-8");
+      return res.send(file);
     });
 
     return function (_x, _x2, _x3) {
       return _ref2.apply(this, arguments);
     };
   })());
-  app.use((() => {
-    var _ref3 = _asyncToGenerator(function* (req, res, next) {
-      const file = yield _fs2.default.readFileAsync(_path2.default.resolve(__dirname, "../public/index.html"), "utf-8");
-      return res.send(file);
-    });
-
-    return function (_x4, _x5, _x6) {
-      return _ref3.apply(this, arguments);
-    };
-  })());
-  const pubsub = new _graphqlRedisSubscriptions.RedisPubSub({
-    connection: Object.assign({}, _config2.default.redis, {
-      retry_strategy: function (options) {
-        //eslint-disable-line
-        // reconnect after
-        return Math.max(options.attempt * 100, 3000);
-      }
-    })
-  });
-  // const subscriptionManager = new SubscriptionManager({
-  //   schema,
-  //   pubsub,
-  //   setupFunctions: {},
-  // });
 
   const server = (0, _http.createServer)(app);
   server.listen(_config2.default.express.port, function () {
     const wsServer = new _subscriptionsTransportWs.SubscriptionServer({
       schema,
-      pubsub,
       execute: _graphql.execute,
       subscribe: _graphql.subscribe
     }, {
       server: server,
-      path: "/subscriptions"
+      path: _config2.default.graphql.wsPath
     });
     log.info(`server listening on port ${_config2.default.express.port}`);
   });

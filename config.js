@@ -2,7 +2,7 @@ module.exports = {
   express: {
     port: process.env.VIRTUAL_PORT || 4081,
     cors: {
-      origin: (process.env.HOST) ? process.env.HOST.split(",") : [],
+      origin: (process.env.HOST) ? process.env.HOST.split(",") : ["http://localhost:4081", "http://localhost:4080"],
     },
     session: {
       secret: process.env.SESSION_KEY || "123abc",
@@ -16,7 +16,11 @@ module.exports = {
     host: process.env.REDIS_HOST || "localhost",
     port: process.env.REDIS_PORT || "6379",
   },
-  graphiql: true,
+  graphql: {
+    graphiql: true,
+    wsHost: "ws://localhost:4081",
+    wsPath: "/subscriptions",
+  },
   sequelize: {
     username: process.env.DATABASE_USER || "username",
     password: process.env.DATABASE_PASSWORD || "password",

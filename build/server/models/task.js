@@ -54,7 +54,7 @@ exports.default = {
         }
       },
       output(result, args, context, info) {
-        return JSON.parse(result.get("options") || "{}");
+        return JSON.parse(result.options || "{}");
       },
       input(field, args, context, info) {
         return JSON.stringify(field);

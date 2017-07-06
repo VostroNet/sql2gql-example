@@ -9,6 +9,7 @@ import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import getMuiTheme from "material-ui/styles/getMuiTheme";
 import client from "web/logic/graphql/client";
 import TaskList from "web/pages/tasks/list";
+console.log("client", client);
 
 injectTapEventPlugin();
 const muiTheme = getMuiTheme({
@@ -17,6 +18,8 @@ const muiTheme = getMuiTheme({
     primary1ColorDark: "#002380",
   },
 });
+
+
 const App = (<ApolloProvider client={client}>
   <StyleRoot>
     <MuiThemeProvider muiTheme={muiTheme}>

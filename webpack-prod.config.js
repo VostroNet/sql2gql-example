@@ -45,6 +45,7 @@ module.exports = {
       "process.env": {
         "NODE_ENV": JSON.stringify("production"),
         "BASEPATH": JSON.stringify("/"),
+        "GRAPHQL_WSURL": JSON.stringify(process.env.WS_HOST + "/subscriptions"),
       },
     }),
     new webpack.optimize.OccurrenceOrderPlugin(),
